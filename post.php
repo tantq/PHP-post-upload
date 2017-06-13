@@ -2,8 +2,13 @@
 
 $data = curl_get('http://ourdesigngroup.com/photos/new');
 preg_match("/<input type=\"hidden\" name=\"authenticity_token\" value=\"(.*)\" \/>/U", $data, $token);
-
+preg_match_all("/<meta name=\"(.*)\" content=\"(.*)\" \/>/U", $data, $meta);
+$head = [];
+foreach ($meta[1] as $key => $value) {
+  $head[] = "{$value}: {$meta[2][$key]}";
+}
 $filename = realpath('upload_data.png');
+echo $filename;
 $file = getCurlValue($filename,'image/png','upload_data.png');
 
 $post = [
@@ -13,10 +18,10 @@ $post = [
    'photo[image]'=>$file,
    'commit' => 'Upload'
 ];
-echo curl_post("http://ourdesigngroup.com/photos",$post);
+echo curl_post("http://ourdesigngroup.com/photos",$post,$head);
 
 
-function curl_post($url,$data)
+function curl_post($url,$data,$head=array())
 {
   $ch = curl_init();
   $head[] = "Connection: keep-alive";
